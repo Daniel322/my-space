@@ -1,0 +1,17 @@
+{
+  "name": "server",
+  "version": "0.0.1",
+  "description": "server for investment app",
+  "main": "/src/index.js",
+  "scripts": {
+    "start": "tsx ./src/index.ts",
+    "test": "echo 'no test'"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.1.0",
+    "tsx": "^4.16.5",
+    "typescript": "^5.5.4"
+  }
+}
