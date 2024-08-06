@@ -11,12 +11,10 @@ async function bootstrap() {
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-  });  
+  });
 
   await WebServer.start(Number(process.env.PORT) || 5555);
-
-  const acc = await Account.create({ email: `qwer${Math.random()}@qwer.com`, password: 'qwerty123S!' });
-  await acc.save();
+  console.log(Database.instance.models, Account.instance);
 
   // const res = await CoinMarket.getList()
   // console.log(res);
