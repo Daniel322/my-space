@@ -1,11 +1,11 @@
 import { Sequelize, Options } from "sequelize";
-import { Account } from "./database/models/account.model";
+import { Account } from "../modules/accounts/account.model";
 export class Database {
   static instance: Sequelize;
 
   static async connect(options: Options) {
     this.instance = new Sequelize(options);
-    console.log(this.instance.models);
+
     try {
       await this.instance.authenticate();
 
