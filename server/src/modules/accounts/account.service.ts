@@ -1,24 +1,27 @@
-import { FindOptions, Model, ModelCtor } from "sequelize";
+import { FindOptions, Model, ModelCtor, ModelStatic, Optional } from "sequelize";
 import { Account } from "./account.model";
 import { AccountParams } from "./account.types";
+import { Service } from "../../service";
 
-export class AccoutnService {
-  private model: ModelCtor<Model>;
+type AccountModel = Model<Account, Account>;
+type PartialAccountParams = Partial<AccountParams>;
 
-  constructor(model: ModelCtor<Model>) {
-    this.model = model;
+export class AccoutnService extends Service {
+  constructor(model: ModelStatic<Model>) {
+    super(model)
   }
 
-  async getList(options: FindOptions): Promise<Model<Account, Account>[] | undefined> {
+  async getList<Account extends {}>(options: FindOptions): Promise<Model<Account, Account>[]> {
     try {
-      return this.model.findAll<Model<Account>>(options);
+      const result = await this.model.findAll(options);
+      return result;
     } catch (error) {
       console.error(error);
       throw new Error(JSON.stringify(error));
     }
   }
   
-  async getByPk(id: string): Promise<Model<Account, Account> | null> {
+  async getByPk<Account extends {}>(id: string): Promise<Model<Account, Account> | null> {
     try {
       return this.model.findByPk<Model<Account>>(id);
     } catch (error) {
@@ -27,12 +30,30 @@ export class AccoutnService {
     }
   }
 
-  async create(data: AccountParams): Promise<Model<Account, Account> | null> {
+  async create<Account extends {}, AccountParams>(data: AccountParams): Promise<Model<Account, Account> | null> {
     try {
-      return this.model.create<Model<Account>>({ ...data });
+      return this.model.create({ ...data });
     } catch (error) {
       console.error(error);
       throw new Error(JSON.stringify(error));
     }
+  }
+
+  async update<Account extends {}, PartialAccountParams>(id: string, data: PartialAccountParams): Promise<Model<Account, Account> | null> {
+    const currentRow = await this.getByPk<Account>(id);
+
+    if (!currentRow) {
+      throw new Error('account not found');
+    }
+
+    currentRow.set({ ...data });
+
+    await currentRow.save();
+
+    return currentRow;
+  }
+
+  async delete(id: string): Promise<number> {
+    return this.model.destroy({ where: { id } });
   }
 }
