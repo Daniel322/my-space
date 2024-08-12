@@ -1,27 +1,30 @@
 import { FindOptions, Model, ModelCtor, ModelStatic, Optional } from "sequelize";
 import { Account } from "./account.model";
-import { AccountParams } from "./account.types";
+import { AccountParams, IAccount } from "./account.types";
 import { Service } from "../../service";
 
 type AccountModel = Model<Account, Account>;
 type PartialAccountParams = Partial<AccountParams>;
 
-export class AccoutnService extends Service {
+export class AccoutnService {
+  private model: ModelStatic<Model>;
   constructor(model: ModelStatic<Model>) {
-    super(model)
+    this.model = model;
   }
 
-  async getList<Account extends {}>(options: FindOptions): Promise<Model<Account, Account>[]> {
-    try {
-      const result = await this.model.findAll(options);
-      return result;
-    } catch (error) {
-      console.error(error);
-      throw new Error(JSON.stringify(error));
-    }
-  }
+  // async getList(options: FindOptions): Promise<Model<IAccount, IAccount>[]> {
+  //   try {
+  //     const instance = await this.model.findAll<IAccount>({ ...options, raw: true });
+
   
-  async getByPk<Account extends {}>(id: string): Promise<Model<Account, Account> | null> {
+  //     return instance;
+  //   } catch (error) {
+  //     console.error(error);
+  //     throw new Error(JSON.stringify(error));
+  //   }
+  // }
+  
+  async getByPk(id: string): Promise<Model<Account, Account> | null> {
     try {
       return this.model.findByPk<Model<Account>>(id);
     } catch (error) {
@@ -30,7 +33,18 @@ export class AccoutnService extends Service {
     }
   }
 
-  async create<Account extends {}, AccountParams>(data: AccountParams): Promise<Model<Account, Account> | null> {
+  async getOne(options: FindOptions): Promise<IAccount> {
+    const instance = await this.model.findOne<Model<IAccount>>(options);
+    if (!instance) {
+      throw new Error('account not found');
+    }
+
+    const jsonAccount = instance.toJSON();
+
+    return jsonAccount;
+  }
+
+  async create(data: AccountParams): Promise<Model<Account, Account> | null> {
     try {
       return this.model.create({ ...data });
     } catch (error) {
@@ -39,8 +53,8 @@ export class AccoutnService extends Service {
     }
   }
 
-  async update<Account extends {}, PartialAccountParams>(id: string, data: PartialAccountParams): Promise<Model<Account, Account> | null> {
-    const currentRow = await this.getByPk<Account>(id);
+  async update(id: string, data: PartialAccountParams): Promise<Model<Account, Account> | null> {
+    const currentRow = await this.getByPk(id);
 
     if (!currentRow) {
       throw new Error('account not found');
@@ -53,7 +67,14 @@ export class AccoutnService extends Service {
     return currentRow;
   }
 
-  async delete(id: string): Promise<number> {
-    return this.model.destroy({ where: { id } });
+  async delete(id: string): Promise<boolean> {
+    const currentAccount = await this.getByPk(id);
+    if (currentAccount) {
+      await currentAccount.destroy();
+
+      return true;
+    }
+
+    throw new Error('account not found');
   }
 }

@@ -1,9 +1,9 @@
 import { Database } from "./adapters/databaseAdapter";
 import { CoinMarket } from "./integrations/coinmarket";
 import { WebServer } from "./adapters/webServer";
-import { Account } from "./modules/accounts/account.model";
 import { Cache } from "./adapters/cacheAdapter";
 import { JwtService } from "./shared/jwt.service";
+import { AccoutnService } from "./modules/accounts/account.service";
 
 async function bootstrap() {
   await Database.connect({
@@ -23,7 +23,12 @@ async function bootstrap() {
   );
 
   await WebServer.start(Number(process.env.PORT) || 5555);
-  console.log(Database.instance.models, Account.instance);
+  
+  const accountService = new AccoutnService(Database.instance.models.Accounts);
+
+  const user = await accountService.getOne({ where: { email: 'qwer0.7978738561974181@qwer.com' } });
+
+  console.log(user);
 
   // const res = await CoinMarket.getList()
   // console.log(res);
