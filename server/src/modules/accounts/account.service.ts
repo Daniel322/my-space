@@ -44,9 +44,10 @@ export class AccoutnService {
     return jsonAccount;
   }
 
-  async create(data: AccountParams): Promise<Model<Account, Account> | null> {
+  async create(data: AccountParams): Promise<IAccount> {
     try {
-      return this.model.create({ ...data });
+      const instance = await this.model.create({ ...data });
+      return instance.toJSON();
     } catch (error) {
       console.error(error);
       throw new Error(JSON.stringify(error));

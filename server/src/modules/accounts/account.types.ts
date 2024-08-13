@@ -1,6 +1,6 @@
 import { Model, Optional } from "sequelize";
 
-export type AccountParams = Omit<any, string> & Optional<any, string> & Optional<any, string> | undefined & {
+export type AccountParams = {
   email: string;
   password: string;
   firstName?: string;

@@ -21,26 +21,54 @@ export class AuthService {
     this.accountService = new AccoutnService(Database.instance.models.Accounts);
   }
 
+  async generateTokens(data: Omit<AccountParams, 'password'>): Promise<string> {
+    const token = await JwtService.sign(data);
+
+    return token;
+  }
+
   async signIn(data: SignInParams): Promise<SignInData> {
-    const currentAccount = await this.accountService.getOne({ where: { email: data.email } });
+    try {
+      const currentAccount = await this.accountService.getOne({ where: { email: data.email } });
 
-    if (!currentAccount) {
-      throw new Error('account not found'); // TODO write error exception for possibility set code status
+      if (!currentAccount) {
+        throw new Error('account not found'); // TODO write error exception for possibility set code status
+      }
+  
+      const { password, ...accountData } = currentAccount.toJSON();
+  
+      const passwordsCompare = await BcryptService.compare(data.password, password);
+  
+      if (!passwordsCompare) {
+        throw new Error('passwords not compare');
+      }
+  
+      const token = await this.generateTokens({ ...accountData });
+  
+      return { token, account: accountData };
+    } catch (error) {
+      throw new Error(JSON.stringify(error));
     }
+  }
 
-    const { password, ...accountData } = currentAccount.toJSON();
+  async signUp({ email, password, ...accountData }: AccountParams): Promise<SignInData> {
+    try {
+      const userWithThatEmail = await this.accountService.getOne({ where: { email } });
 
-    const passwordsCompare = await BcryptService.compare(data.password, password);
+      if (userWithThatEmail) {
+        throw new Error('user with that email already create');
+      }
 
-    if (!passwordsCompare) {
-      throw new Error('passwords not compare');
+      const hashedPassword = await BcryptService.hash(password);
+
+      const account = await this.accountService.create({ ...accountData, email, password: hashedPassword });
+
+      const token = await this.generateTokens({ ...accountData, email });
+
+      return { token, account };
+    } catch (error) {
+      throw new Error(JSON.stringify(error));
     }
-
-    const token = await JwtService.sign({ ...accountData });
-
-    await Cache.set(`${accountData.id}-token`, token);
-
-    return { token, account: accountData };
   }
 
 }
