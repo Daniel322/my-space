@@ -18,5 +18,10 @@ export class WebServer {
     this.app.listen(port || 5555, () => {
       console.log(`Web server started on ${port} port`);
     });
+
+    this.app.get('/', (req, res) => {
+      res.status(401);
+      res.send('asdfasdf');
+    })
   }
 }

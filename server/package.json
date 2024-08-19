@@ -25,6 +25,7 @@
     "axios": "^1.7.3",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
+    "class-transformer": "^0.5.1",
     "cookie": "^0.6.0",
     "cors": "^2.8.5",
     "debug-threads-ns": "^0.2.3",
@@ -33,6 +34,7 @@
     "pg": "^8.12.0",
     "pg-hstore": "^2.3.4",
     "redis": "^4.7.0",
+    "reflect-metadata": "^0.2.2",
     "sequelize": "^6.37.3"
   }
 }
